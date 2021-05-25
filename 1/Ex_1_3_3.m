@@ -3,6 +3,7 @@ load iris.mat
 model = { Xtrain , Ytrain , 'c', [], [],'RBF_kernel'};
 
 algorithm = 'simplex';
+algorithm = 'gridsearch';
 
 tic
 [gam ,sig2 , cost] = tunelssvm(model, algorithm, 'crossvalidatelssvm',{10, 'misclass'});

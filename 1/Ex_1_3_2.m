@@ -24,7 +24,7 @@ for i = 1:m
         
         k = 10;
         cost_CV = crossvalidate(model, k, 'misclass');
-        
+
         cost_LOO = leaveoneout(model, 'misclass');
         
         record(index,1) = gam(i);
@@ -48,21 +48,36 @@ figure
 
 stem3(x,y,z1, '-r','LineWidth',4);
 hold on;
-stem3(x,y,z2, '-g','LineWidth',4);
+stem3(x,y+0.1,z2, '-g','LineWidth',4);
 hold on;
-stem3(x,y,z3, '-b','LineWidth',4);
+stem3(x,y-0.1,z3, '-b','LineWidth',4);
 
+
+min_gam = 10000;
+min_sig = 10000;
+global_min_loss = 100;
+for rec = record'
+      min_loss = min([rec(3,1), rec(4,1), rec(5,1)]);
+      if min_loss < global_min_loss
+          global_min_loss = min_loss;
+          min_gam = rec(1,1);
+          min_sig = rec(2,1);
+      end
+      
+end
 
 
 
 xlabel('log10(gam)'); ylabel('log10(sig2)'); zlabel('misclass error');
 legend('cost RS','cost CV','cost LOO')
 zoom on; grid on;
+min_gam
+min_sig
 
 
 
-xlim([-3 3])
-ylim([-3 3])
+%xlim([-3 3])
+%ylim([-3 3])
 zlim([0 0.6])
 %%
 % % Random split 
