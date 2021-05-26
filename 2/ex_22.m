@@ -1,13 +1,16 @@
+
+close all;
+clear all;
 load logmap.mat
 
 % orderlist = [2 5 10 20 40 80 100 120 140];
-orderlist = [1 2 5 10 20 50 80 100];
+orderlist = 1:100;
 n = length(orderlist);
 
 gamlist = zeros(1,n);
 sig2list = zeros(1,n);
 
-RMSE_order = zeros(1,n);
+MSE_order = zeros(1,n);
 MAE_order = zeros(1,n);
 
 for i = 1:n
@@ -22,7 +25,7 @@ for i = 1:n
     % tune the gam and sig2 with training data
     model = { X , Y , 'f', [], [],'RBF_kernel'};
     algorithm = 'simplex';
-    [gam , sig2, cost] = tunelssvm(model, algorithm, 'crossvalidatelssvm',{10, 'mse'});
+    [gam , sig2, cost] = tunelssvm(model, algorithm, 'crossvalidatelssvm',{5, 'mse'});
     
     % notedown the tuned gam and sig2 for each order number 
     gamlist(i) = gam;
@@ -49,9 +52,9 @@ for i = 1:n
 %     plot(prediction, 'r');
 %     hold off;
     
-    RMSE_order(i) = sqrt(mean((Ztest-prediction).^2));
+    MSE_order(i) = mean((Ztest-prediction).^2);
     
-    MAE_order(i) = mean(abs((Ztest-prediction)));
+%     MAE_order(i) = mean(abs((Ztest-prediction)));
     
 %     R = corrcoef(Ztest,prediction);
 %     R_order(i) = R(1,2);
@@ -64,9 +67,9 @@ figure
 hold on
 xlabel('Order')
 ylabel('MSE and MAE')
-plot(orderlist, RMSE_order,'r');
-plot(orderlist, MAE_order,'b');
-legend('RMSE','MAE')
+plot(orderlist, MSE_order,'r');
+% plot(orderlist, MAE_order,'b');
+legend('MSE')
 hold off
 % 
 % % [alpha, b] = trainlssvm({X, Y, 'f', gam, sig2});
@@ -75,19 +78,17 @@ hold off
 % disp(min_mse);
 % 
 
-index = 6;
+index = 23;
 opt_order = orderlist(index);
 disp(opt_order);
 opt_gam = gamlist(index);
 disp(opt_gam);
 opt_sig2 = sig2list(index);
 disp(opt_sig2);
-% 
-% 
-% 
+
 Xs = Z(end - opt_order + 1:end , 1);
 
-X = windowize(Z, 1:(opt_order + 1));    
+X = windowize(Z, 1:(opt_order + 1));
 Y = X(:, end);
 X = X(:, 1:opt_order);
 
@@ -105,5 +106,6 @@ hold off;
 
 % MSE = immse(Ztest,prediction);
 % disp(MSE);
+
 
 

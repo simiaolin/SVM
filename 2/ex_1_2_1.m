@@ -1,4 +1,6 @@
-X = (-3:0.2:3)';
+clear all;
+close all;
+X = (-3:0.01:3)';
 Y = sinc(X) + 0.1.*randn(length(X),1);
 
 %%
@@ -30,8 +32,8 @@ Ytest = Y(2:2:end);
 
 
 
-% gamlist = [1e-2 1e-1 1  1e1 1e2 1e3 1e6];
-% sig2list = [1e-4 1e-2 1 1e2 1e4];
+% gamlist = [1e1  1e3 1e6];
+% sig2list = [1e-4 1 1e2 ];
 % 
 % MSElist = zeros(length(gamlist),length(sig2list));
 % 
@@ -48,33 +50,41 @@ Ytest = Y(2:2:end);
 %         
 %     end
 % end
-% 
-%%
+% % 
+% %%
 % cdata = MSElist;
 % yvalues = gamlist;
 % xvalues = sig2list;
+% 
 % h = heatmap(xvalues,yvalues,cdata);
 % 
-% h.Title = 'MSE Results ';
+% 
+% h.Title = 'MSE';
 % h.XLabel = 'Sig2';
 % h.YLabel = 'Gam';
+
 %%
+
 type = 'f';
 kernel_type = 'RBF_kernel';
 
 model = {Xtrain,Ytrain,type,[],[],kernel_type};
 
+gam=1e6;
+sig2= 1;
 
-[gam,sig2] = tunelssvm(model,'gridsearch','leaveoneoutlssvm', {'mse'});
+tic
+% [gam,sig2] = tunelssvm(model,'simplex','leaveoneoutlssvm', {'mse'});
 
 [alpha,b] = trainlssvm({Xtrain,Ytrain,type,gam,sig2,'RBF_kernel'});
+toc
         
 Yt = simlssvm({Xtrain,Ytrain,type,gam,sig2,'RBF_kernel','preprocess'},{alpha,b},Xtest);
 
 plotlssvm({Xtrain,Ytrain,type,gam,sig2,'RBF_kernel','preprocess'},{alpha,b});
+hold on; 
 
-
-hold on; plot(min(X):.1:max(X),sinc(min(X):.1:max(X)),'r-.');
+plot(min(X):.1:max(X),sinc(min(X):.1:max(X)),'r-.');
         
 MSE = mean((Yt - Ytest).^2);   % Mean Squared Error
 disp(gam);
